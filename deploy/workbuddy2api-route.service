@@ -1,0 +1,12 @@
+[Unit]
+Description=Route published WorkBuddy container replies through the main interface
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/workbuddy2api-route
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

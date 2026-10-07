@@ -4,6 +4,7 @@ services:
     container_name: workbuddy2api
     restart: unless-stopped
     # 容器默认以 app 用户（uid 10001）运行。宿主机挂载目录属主不同会导致
+    #  http://127.0.0.1:7863/panel/
     # 「写入 auths/*.json.tmp 失败 permission denied」，三种解法任选：
     #   1) 非 root · 让容器以你自己的 uid 运行（挂载目录本来就是你建的）：
     #      PUID=$(id -u) PGID=$(id -g) docker compose up -d
@@ -23,3 +24,12 @@ services:
       # 但前提是它能以文件形式写入 —— 挂载目录会挡住这条路径）。
       # 不挂 :ro：面板「配置」页需要写回此文件（保存后热生效）。
       - ./config.json:/app/config.json
+
+networks:
+  default:
+    # hz 上的 mihomo 策略路由按 Docker 网桥区分流量；固定网桥名后，
+    # workbuddy2api-route.service 可以在重启和容器重建后持续补主路由例外。
+    name: workbuddy2api
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: workbuddy2api0
